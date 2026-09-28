@@ -7,7 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const opportunityRoutes = require("./routes/opportunityRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const savedOpportunityRoutes = require("./routes/savedOpportunityRoutes");
-const dashboardRoutes= require("./routes/dashboardRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 
@@ -44,7 +44,10 @@ if (!MONGO_URI) {
 
 // MongoDB connection
 mongoose
-  .connect(MONGO_URI)
+  .connect(MONGO_URI, {
+    family: 4,
+    serverSelectionTimeoutMS: 15000,
+  })
   .then(() => {
     console.log("MongoDB connected successfully ✅");
 
@@ -54,6 +57,6 @@ mongoose
   })
   .catch((error) => {
     console.error("MongoDB connection failed ❌");
-    console.error(error.message);
+    console.error(error);
     process.exit(1);
   });

@@ -1,7 +1,10 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5001/api",
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    "http://localhost:5001/api",
+
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,21 +16,16 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token =
-      localStorage.getItem(
-        "campuslaunch_token"
-      );
+    const token = localStorage.getItem("campuslaunch_token");
 
     if (token) {
-      config.headers.Authorization =
-        `Bearer ${token}`;
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // ============================================================
@@ -35,18 +33,15 @@ api.interceptors.request.use(
 // ============================================================
 
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
 
   (error) => {
     if (
       error.response?.status === 401 ||
       error.response?.status === 403
     ) {
-      localStorage.removeItem(
-        "campuslaunch_token"
-      );
+      localStorage.removeItem("campuslaunch_token");
+      localStorage.removeItem("campuslaunch_user");
     }
 
     return Promise.reject(error);

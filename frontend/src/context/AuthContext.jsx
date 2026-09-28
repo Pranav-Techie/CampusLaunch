@@ -7,27 +7,18 @@ import {
 
 import api from "../services/api";
 
-const AuthContext =
-  createContext(null);
+const AuthContext = createContext(null);
 
-export function AuthProvider({
-  children,
-}) {
-  const [user, setUser] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // ==========================================================
   // LOAD CURRENT USER
   // ==========================================================
 
   const loadUser = async () => {
-    const token =
-      localStorage.getItem(
-        "campuslaunch_token"
-      );
+    const token = localStorage.getItem("campuslaunch_token");
 
     if (!token) {
       setUser(null);
@@ -36,31 +27,17 @@ export function AuthProvider({
     }
 
     try {
-      const response =
-        await api.get(
-          "/auth/me"
-        );
+      const response = await api.get("/auth/me");
 
-      setUser(
-        response.data.user ||
-          response.data
-      );
+      setUser(response.data.user || response.data);
     } catch (error) {
-      console.error(
-        "Failed to load user:",
-        error
-      );
+      console.error("Failed to load user:", error);
 
       if (
-        error.response?.status ===
-          401 ||
-        error.response?.status ===
-          403
+        error.response?.status === 401 ||
+        error.response?.status === 403
       ) {
-        localStorage.removeItem(
-          "campuslaunch_token"
-        );
-
+        localStorage.removeItem("campuslaunch_token");
         setUser(null);
       }
     } finally {
@@ -80,23 +57,19 @@ export function AuthProvider({
   // LOGIN
   // ==========================================================
 
-  const login = async (
-    email,
-    password,
-    expectedRole
-  ) => {
-    const response =
-      await api.post(
-        "/auth/login",
-        {
-          email,
-          password,
-          expectedRole,
-        }
-      );
+  const login = async (email, password, expectedRole = undefined) => {
+    const payload = {
+      email: email.trim().toLowerCase(),
+      password,
+    };
 
-    const token =
-      response.data.token;
+    if (expectedRole) {
+      payload.expectedRole = expectedRole;
+    }
+
+    const response = await api.post("/auth/login", payload);
+
+    const token = response.data?.token;
 
     if (!token) {
       throw new Error(
@@ -104,13 +77,9 @@ export function AuthProvider({
       );
     }
 
-    localStorage.setItem(
-      "campuslaunch_token",
-      token
-    );
+    localStorage.setItem("campuslaunch_token", token);
 
-    const loggedInUser =
-      response.data.user;
+    const loggedInUser = response.data?.user;
 
     setUser(loggedInUser);
 
@@ -121,15 +90,8 @@ export function AuthProvider({
   // REGISTER
   // ==========================================================
 
-  const register = async (
-    userData
-  ) => {
-    const response =
-      await api.post(
-        "/auth/register",
-        userData
-      );
-
+  const register = async (userData) => {
+    const response = await api.post("/auth/register", userData);
     return response.data;
   };
 
@@ -138,10 +100,7 @@ export function AuthProvider({
   // ==========================================================
 
   const logout = () => {
-    localStorage.removeItem(
-      "campuslaunch_token"
-    );
-
+    localStorage.removeItem("campuslaunch_token");
     setUser(null);
   };
 
@@ -170,9 +129,7 @@ export function AuthProvider({
 // ==========================================================
 
 export function useAuth() {
-  return useContext(
-    AuthContext
-  );
+  return useContext(AuthContext);
 }
 
 export default AuthContext;
