@@ -53,7 +53,7 @@ CampusLaunch brings these activities into one student-centric platform.
 - Himalayas job synchronization
 - External opportunity source tracking
 
-The admin dashboard includes a dedicated Himalayas synchronization action that fetches external opportunities into the platform. :contentReference[oaicite:0]{index=0}
+The admin dashboard includes a dedicated **Sync Himalayas** action that fetches external opportunities into the platform.
 
 ---
 
@@ -73,87 +73,112 @@ Monitor Status
 Receive Deadline Reminder
    ↓
 Act Before Deadline
+```
 
-Personalization
+---
+
+## Personalization
 
 CampusLaunch uses student profile information such as:
 
-Skills
-Interests
-Course
-Academic year
+- Skills
+- Interests
+- Course
+- Academic year
 
 to identify opportunities that may be relevant to the student.
 
-Deadline Intelligence
+---
+
+## Deadline Intelligence
 
 CampusLaunch monitors upcoming opportunity deadlines and generates reminders based on remaining time.
 
 Example reminder windows:
 
-7 days remaining → Reminder
-3 days remaining → Reminder
-1 day remaining → Urgent reminder
+| Time remaining | Reminder type    |
+| -------------- | ---------------- |
+| 7 days         | Reminder         |
+| 3 days         | Reminder         |
+| 1 day          | Urgent reminder  |
 
 Notifications can be surfaced inside the student dashboard and delivered through configured communication channels.
 
-Technology Stack
-Frontend
-React
-Vite
-JavaScript
-Axios
-React Router
-Lucide React
-CSS
-Backend
-Node.js
-Express.js
-REST APIs
-JWT Authentication
-bcrypt
-Zod
-Multer
-Database
-MongoDB Atlas
-Mongoose
-Integrations
-Himalayas Jobs API
-Resend
-WhatsApp Business Cloud API
-Deployment
-Vercel — Frontend
-Render — Backend
-MongoDB Atlas — Database
-System Architecture
+---
+
+## Technology Stack
+
+**Frontend**
+- React
+- Vite
+- JavaScript
+- Axios
+- React Router
+- Lucide React
+- CSS
+
+**Backend**
+- Node.js
+- Express.js
+- REST APIs
+- JWT Authentication
+- bcrypt
+- Zod
+- Multer
+
+**Database**
+- MongoDB Atlas
+- Mongoose
+
+**Integrations**
+- Himalayas Jobs API
+- Resend
+- WhatsApp Business Cloud API
+
+**Deployment**
+- Vercel — Frontend
+- Render — Backend
+- MongoDB Atlas — Database
+
+---
+
+## System Architecture
+
+```text
                     ┌──────────────────────┐
-                    │      Students       │
-                    │  Web Browser / UI   │
+                    │       Students       │
+                    │   Web Browser / UI   │
                     └──────────┬───────────┘
                                │
                                ▼
                     ┌──────────────────────┐
-                    │       Vercel        │
-                    │   React + Vite      │
+                    │        Vercel        │
+                    │     React + Vite     │
                     └──────────┬───────────┘
                                │ REST API
                                ▼
                     ┌──────────────────────┐
-                    │       Render        │
-                    │ Node + Express API  │
+                    │        Render        │
+                    │  Node + Express API  │
                     └───────┬──────┬───────┘
                             │      │
               ┌─────────────┘      └──────────────┐
               ▼                                   ▼
      ┌─────────────────┐                  ┌─────────────────┐
-     │ MongoDB Atlas   │                  │ External APIs   │
-     │ Users           │                  │ Himalayas       │
-     │ Opportunities   │                  │ Resend          │
-     │ Applications    │                  │ WhatsApp Cloud  │
-     │ Saved Items     │                  └─────────────────┘
-     │ Notifications   │
+     │  MongoDB Atlas  │                  │  External APIs  │
+     │  Users          │                  │  Himalayas      │
+     │  Opportunities  │                  │  Resend         │
+     │  Applications   │                  │  WhatsApp Cloud │
+     │  Saved Items    │                  └─────────────────┘
+     │  Notifications  │
      └─────────────────┘
-Project Structure
+```
+
+---
+
+## Project Structure
+
+```text
 CampusLaunch/
 │
 ├── backend/
@@ -164,7 +189,7 @@ CampusLaunch/
 │   ├── utils/
 │   ├── server.js
 │   ├── package.json
-│   └── .env
+│   └── .env            (local only, never committed)
 │
 ├── frontend/
 │   ├── src/
@@ -178,65 +203,90 @@ CampusLaunch/
 │
 ├── .gitignore
 └── README.md
-Local Development
-1. Clone the repository
+```
+
+---
+
+## Local Development
+
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/Pranav-Techie/CampusLaunch.git
 cd CampusLaunch
-2. Install frontend dependencies
+```
+
+### 2. Install frontend dependencies
+
+```bash
 cd frontend
 npm install
-3. Install backend dependencies
+```
+
+### 3. Install backend dependencies
+
+```bash
 cd ../backend
 npm install
-4. Configure backend environment variables
+```
 
-Create:
+### 4. Configure backend environment variables
 
-backend/.env
+Create a file named `backend/.env` and fill in your own values:
 
-Example:
-
+```env
 PORT=5001
 
-MONGO_URI=mongodb+srv://YOUR_DATABASE_USER:YOUR_DATABASE_PASSWORD@YOUR_CLUSTER.mongodb.net/campuslaunch
+# MongoDB Atlas connection string (copy it from Atlas: Connect > Drivers)
+MONGO_URI=<your-mongodb-atlas-connection-string>
 
-JWT_SECRET=YOUR_JWT_SECRET
+JWT_SECRET=<your-jwt-secret>
 
-RESEND_API_KEY=YOUR_RESEND_API_KEY
-EMAIL_FROM=YOUR_EMAIL
+RESEND_API_KEY=<your-resend-api-key>
+EMAIL_FROM=<your-sender-email>
 
-WHATSAPP_ACCESS_TOKEN=YOUR_WHATSAPP_ACCESS_TOKEN
-WHATSAPP_PHONE_NUMBER_ID=YOUR_WHATSAPP_PHONE_NUMBER_ID
+WHATSAPP_ACCESS_TOKEN=<your-whatsapp-access-token>
+WHATSAPP_PHONE_NUMBER_ID=<your-whatsapp-phone-number-id>
+```
 
-Never commit .env to GitHub.
+> **Never commit `.env` to GitHub.** Make sure `.env` is listed in `.gitignore`.
 
-5. Start backend
+### 5. Start the backend
+
+```bash
 cd backend
 npm run dev
-6. Start frontend
+```
+
+### 6. Start the frontend
 
 In another terminal:
 
+```bash
 cd frontend
 npm run dev
-Authentication
+```
+
+---
+
+## Authentication
 
 CampusLaunch uses:
 
-JWT
-+
-bcrypt password hashing
-+
-protected API routes
-+
-role-based authorization
+- JWT authentication
+- bcrypt password hashing
+- Protected API routes
+- Role-based authorization
 
 Students and administrators use separate application flows, while the backend determines the authenticated user's role.
 
-Data Model
+---
+
+## Data Model
 
 Main entities include:
 
+```text
 User
  ├── Profile
  ├── Skills
@@ -264,71 +314,86 @@ Notification
  ├── Student
  ├── Opportunity
  └── Reminder Type
+```
 
-The admin interface currently loads student applications through the /applications/admin/all endpoint and displays student and opportunity information for each application.
+The admin interface loads student applications through the `/applications/admin/all` endpoint and displays student and opportunity information for each application.
 
-External Opportunity Data
+---
+
+## External Opportunity Data
 
 CampusLaunch can synchronize opportunities from Himalayas through its admin synchronization workflow.
 
-The admin dashboard exposes:
-
-Sync Himalayas
-
-which calls the backend synchronization endpoint and then refreshes the admin opportunity data.
+The admin dashboard exposes a **Sync Himalayas** button, which calls the backend synchronization endpoint and then refreshes the admin opportunity data.
 
 Himalayas opportunities are displayed with their external source attribution.
 
-Deployment
-Frontend — Vercel
+---
 
-Configure:
+## Deployment
 
-Root Directory: frontend
-Build Command: npm run build
+### Frontend — Vercel
+
+```text
+Root Directory:   frontend
+Build Command:    npm run build
 Output Directory: dist
+```
 
 Frontend environment variable:
 
-VITE_API_URL=https://YOUR-BACKEND.onrender.com/api
-Backend — Render
+```env
+VITE_API_URL=https://<your-backend>.onrender.com/api
+```
 
-Configure:
+### Backend — Render
 
+```text
 Root Directory: backend
-Build Command: npm install
-Start Command: npm start
+Build Command:  npm install
+Start Command:  npm start
+```
 
-Set production environment variables in Render.
+Set all production environment variables in the Render dashboard.
 
-Database — MongoDB Atlas
+### Database — MongoDB Atlas
 
-Use the Atlas connection string as:
+Use your Atlas connection string as the `MONGO_URI` environment variable in Render.
 
-MONGO_URI=mongodb+srv://...
+The deployed backend connects directly to MongoDB Atlas, so the Atlas website does not need to remain open.
 
-The deployed backend connects directly to MongoDB Atlas. The MongoDB Atlas website does not need to remain open.
+---
 
-Security Notes
-.env is excluded from Git
-Passwords are hashed before storage
-JWT authentication protects private routes
-Admin routes require administrator authorization
-API credentials must be stored as environment variables
-Production secrets should never be committed to the repository
-Future Roadmap
-Multi-source opportunity aggregation
-Automated scheduled opportunity synchronization
-More advanced recommendation scoring
-Calendar integration
-Push notifications
-Expanded WhatsApp notification workflows
-Opportunity quality and duplicate detection
-Student career analytics
-Project Vision
+## Security Notes
+
+- `.env` is excluded from Git
+- Passwords are hashed before storage
+- JWT authentication protects private routes
+- Admin routes require administrator authorization
+- API credentials are stored only as environment variables
+- Production secrets are never committed to the repository
+- Documentation uses `<placeholder>` values instead of connection-string-shaped examples, so secret scanners are not triggered
+
+---
+
+## Future Roadmap
+
+- Multi-source opportunity aggregation
+- Automated scheduled opportunity synchronization
+- More advanced recommendation scoring
+- Calendar integration
+- Push notifications
+- Expanded WhatsApp notification workflows
+- Opportunity quality and duplicate detection
+- Student career analytics
+
+---
+
+## Project Vision
 
 CampusLaunch aims to turn scattered opportunity discovery into a structured student workflow:
 
+```text
 Find the right opportunity
         ↓
 Understand why it fits
@@ -338,20 +403,18 @@ Track your progress
 Remember the deadline
         ↓
 Take action
-Author
+```
 
-Pranav Jha
+---
 
-GitHub: @Pranav-Techie
+## Author
 
-License
+**Pranav Jha**
+
+GitHub: [@Pranav-Techie](https://github.com/Pranav-Techie)
+
+---
+
+## License
 
 This project is developed as a student/hackathon project.
-
-
-### 3. Add it
-
-From:
-
-```bash
-cd ~/CampusLaunch
