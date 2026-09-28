@@ -10,10 +10,6 @@ const api = axios.create({
   },
 });
 
-// ============================================================
-// REQUEST INTERCEPTOR
-// ============================================================
-
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("campuslaunch_token");
@@ -28,13 +24,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ============================================================
-// RESPONSE INTERCEPTOR
-// ============================================================
-
 api.interceptors.response.use(
   (response) => response,
-
   (error) => {
     if (
       error.response?.status === 401 ||
