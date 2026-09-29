@@ -1,4 +1,9 @@
 import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
   ArrowRight,
   Bell,
   Bookmark,
@@ -15,7 +20,166 @@ import {
 
 import { Link } from "react-router-dom";
 
+import api from "../services/api";
+
+/*
+|--------------------------------------------------------------------------
+| HELPERS
+|--------------------------------------------------------------------------
+*/
+
+const opportunityIcons = {
+  Internship: BriefcaseBusiness,
+  Hackathon: Trophy,
+  Certification: GraduationCap,
+  Competition: Target,
+  Scholarship: GraduationCap,
+  Workshop: GraduationCap,
+};
+
+const opportunityColors = [
+  "purple",
+  "blue",
+  "green",
+];
+
+function getOpportunityIcon(type) {
+  return (
+    opportunityIcons[type] ||
+    BriefcaseBusiness
+  );
+}
+
+function formatDeadline(deadline) {
+  if (!deadline) {
+    return "Deadline not listed";
+  }
+
+  const date = new Date(deadline);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Deadline not listed";
+  }
+
+  return `Deadline ${date.toLocaleDateString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  )}`;
+}
+
+/*
+|--------------------------------------------------------------------------
+| HOME
+|--------------------------------------------------------------------------
+*/
+
 function Home() {
+  const [
+    featuredOpportunities,
+    setFeaturedOpportunities,
+  ] = useState([]);
+
+  const [
+    opportunitiesLoading,
+    setOpportunitiesLoading,
+  ] = useState(true);
+
+  /*
+   * =====================================================
+   * LOAD REAL OPPORTUNITIES
+   * =====================================================
+   */
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadOpportunities = async () => {
+      try {
+        setOpportunitiesLoading(true);
+
+        const response = await api.get(
+          "/opportunities"
+        );
+
+        const opportunities =
+          Array.isArray(
+            response.data?.opportunities
+          )
+            ? response.data.opportunities
+            : [];
+
+        /*
+         * Prefer opportunities with a future deadline,
+         * then sort by the nearest deadline.
+         */
+
+        const now = Date.now();
+
+        const sorted =
+          opportunities
+            .filter((opportunity) => {
+              if (!opportunity?.deadline) {
+                return true;
+              }
+
+              const timestamp = new Date(
+                opportunity.deadline
+              ).getTime();
+
+              return (
+                Number.isNaN(timestamp) ||
+                timestamp >= now
+              );
+            })
+            .sort((a, b) => {
+              const first = a?.deadline
+                ? new Date(
+                    a.deadline
+                  ).getTime()
+                : Number.MAX_SAFE_INTEGER;
+
+              const second = b?.deadline
+                ? new Date(
+                    b.deadline
+                  ).getTime()
+                : Number.MAX_SAFE_INTEGER;
+
+              return first - second;
+            })
+            .slice(0, 3);
+
+        if (isMounted) {
+          setFeaturedOpportunities(
+            sorted
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load homepage opportunities:",
+          error
+        );
+
+        if (isMounted) {
+          setFeaturedOpportunities([]);
+        }
+      } finally {
+        if (isMounted) {
+          setOpportunitiesLoading(false);
+        }
+      }
+    };
+
+    loadOpportunities();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="home-page">
       {/* =====================================================
@@ -28,7 +192,9 @@ function Home() {
           className="home-brand"
           aria-label="CampusLaunch home"
         >
-          <span className="home-brand-mark">CL</span>
+          <span className="home-brand-mark">
+            CL
+          </span>
 
           <span className="home-brand-name">
             CampusLaunch
@@ -99,13 +265,17 @@ function Home() {
               Find what fits.
               <br />
 
-              <span>Track what matters.</span>
+              <span>
+                Track what matters.
+              </span>
             </h1>
 
             <p>
-              CampusLaunch brings internships, hackathons,
-              certifications, workshops and other student
-              opportunities into one personalized space.
+              CampusLaunch brings internships,
+              hackathons, certifications,
+              workshops and other student
+              opportunities into one personalized
+              space.
             </p>
 
             <div className="home-hero-actions">
@@ -113,7 +283,10 @@ function Home() {
                 to="/auth"
                 className="home-primary-button"
               >
-                <span>Start exploring</span>
+                <span>
+                  Start exploring
+                </span>
+
                 <ArrowRight size={18} />
               </Link>
 
@@ -121,7 +294,10 @@ function Home() {
                 href="#how-it-works"
                 className="home-secondary-button"
               >
-                <span>See how it works</span>
+                <span>
+                  See how it works
+                </span>
+
                 <ChevronRight size={17} />
               </a>
             </div>
@@ -181,16 +357,16 @@ function Home() {
                   </span>
 
                   <h3>
-                    Good morning, Pranav
+                    Latest opportunities
                   </h3>
                 </div>
 
                 <div className="home-panel-avatar">
-                  P
+                  CL
                 </div>
               </div>
 
-              {/* Match banner */}
+              {/* Live opportunity banner */}
 
               <div className="home-match-banner">
                 <div className="home-match-icon">
@@ -199,84 +375,149 @@ function Home() {
 
                 <div>
                   <strong>
-                    3 opportunities match your profile
+                    {opportunitiesLoading
+                      ? "Finding opportunities..."
+                      : `${featuredOpportunities.length} live opportunities`}
                   </strong>
 
                   <span>
-                    Based on your skills and interests
+                    Updated from the CampusLaunch opportunity feed
                   </span>
                 </div>
               </div>
 
-              {/* Opportunity 1 */}
+              {/* Real opportunities */}
 
-              <div className="home-mini-opportunity">
-                <div className="home-mini-icon purple">
-                  <BriefcaseBusiness size={17} />
+              {opportunitiesLoading ? (
+                <>
+                  <div className="home-mini-opportunity">
+                    <div className="home-mini-icon purple">
+                      <BriefcaseBusiness size={17} />
+                    </div>
+
+                    <div className="home-mini-content">
+                      <strong>
+                        Loading opportunities...
+                      </strong>
+
+                      <span>
+                        Fetching the latest listings
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="home-mini-opportunity">
+                    <div className="home-mini-icon blue">
+                      <Trophy size={17} />
+                    </div>
+
+                    <div className="home-mini-content">
+                      <strong>
+                        Please wait
+                      </strong>
+
+                      <span>
+                        Connecting to CampusLaunch
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="home-mini-opportunity">
+                    <div className="home-mini-icon green">
+                      <GraduationCap size={17} />
+                    </div>
+
+                    <div className="home-mini-content">
+                      <strong>
+                        Live opportunity feed
+                      </strong>
+
+                      <span>
+                        Loading real data
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : featuredOpportunities.length >
+                0 ? (
+                featuredOpportunities.map(
+                  (
+                    opportunity,
+                    index
+                  ) => {
+                    const OpportunityIcon =
+                      getOpportunityIcon(
+                        opportunity.type
+                      );
+
+                    const color =
+                      opportunityColors[
+                        index %
+                          opportunityColors.length
+                      ];
+
+                    return (
+                      <div
+                        className="home-mini-opportunity"
+                        key={
+                          opportunity._id ||
+                          opportunity.id ||
+                          `${opportunity.title}-${index}`
+                        }
+                      >
+                        <div
+                          className={`home-mini-icon ${color}`}
+                        >
+                          <OpportunityIcon
+                            size={17}
+                          />
+                        </div>
+
+                        <div className="home-mini-content">
+                          <strong>
+                            {opportunity.title ||
+                              "Untitled opportunity"}
+                          </strong>
+
+                          <span>
+                            {opportunity.mode ||
+                              "Flexible"}{" "}
+                            ·{" "}
+                            {opportunity.type ||
+                              "Opportunity"}
+                          </span>
+                        </div>
+
+                        <div className="home-mini-match">
+                          {formatDeadline(
+                            opportunity.deadline
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                )
+              ) : (
+                <div className="home-mini-opportunity">
+                  <div className="home-mini-icon purple">
+                    <Compass size={17} />
+                  </div>
+
+                  <div className="home-mini-content">
+                    <strong>
+                      No current opportunities
+                    </strong>
+
+                    <span>
+                      Check back soon for new listings
+                    </span>
+                  </div>
                 </div>
-
-                <div className="home-mini-content">
-                  <strong>
-                    Software Engineering Internship
-                  </strong>
-
-                  <span>
-                    Remote · Technology
-                  </span>
-                </div>
-
-                <div className="home-mini-match">
-                  92%
-                </div>
-              </div>
-
-              {/* Opportunity 2 */}
-
-              <div className="home-mini-opportunity">
-                <div className="home-mini-icon blue">
-                  <Trophy size={17} />
-                </div>
-
-                <div className="home-mini-content">
-                  <strong>
-                    AI Innovation Challenge
-                  </strong>
-
-                  <span>
-                    Online · Hackathon
-                  </span>
-                </div>
-
-                <div className="home-mini-match">
-                  84%
-                </div>
-              </div>
-
-              {/* Opportunity 3 */}
-
-              <div className="home-mini-opportunity">
-                <div className="home-mini-icon green">
-                  <GraduationCap size={17} />
-                </div>
-
-                <div className="home-mini-content">
-                  <strong>
-                    Cloud Certification Program
-                  </strong>
-
-                  <span>
-                    Online · Certification
-                  </span>
-                </div>
-
-                <div className="home-mini-match">
-                  78%
-                </div>
-              </div>
+              )}
 
               <div className="home-panel-footer">
                 <span>
-                  3 deadlines coming up
+                  Real opportunities from your platform
                 </span>
 
                 <Bell size={15} />
@@ -306,8 +547,9 @@ function Home() {
             </h2>
 
             <p>
-              Discover more than just jobs. Find the
-              experiences that build your next step.
+              Discover more than just jobs. Find
+              the experiences that build your next
+              step.
             </p>
           </div>
 
@@ -328,8 +570,8 @@ function Home() {
               </h3>
 
               <p>
-                Find roles aligned with your skills,
-                course and career interests.
+                Find roles aligned with your
+                skills, course and career interests.
               </p>
 
               <span>
@@ -357,8 +599,8 @@ function Home() {
               </h3>
 
               <p>
-                Discover competitions where you can
-                build, compete and learn.
+                Discover competitions where you
+                can build, compete and learn.
               </p>
 
               <span>
@@ -451,9 +693,9 @@ function Home() {
             </h2>
 
             <p>
-              CampusLaunch is designed around the actual
-              journey students go through when pursuing
-              opportunities.
+              CampusLaunch is designed around the
+              actual journey students go through when
+              pursuing opportunities.
             </p>
           </div>
 
@@ -609,9 +851,9 @@ function Home() {
             </h2>
 
             <p>
-              CampusLaunch is designed to help students
-              move from simply seeing opportunities to
-              actually acting on them.
+              CampusLaunch is designed to help
+              students move from simply seeing
+              opportunities to actually acting on them.
             </p>
 
             <div className="home-benefit-list">
